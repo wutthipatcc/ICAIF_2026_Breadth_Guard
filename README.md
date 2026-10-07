@@ -1,10 +1,42 @@
 # BreadthGuard
 
-* `strategies/Combined_V4.py`: **Combined_V4**, the current best agent (section below). Run it in the official kit with
-  `strategies/run_combined_v4.py`.
+* `strategies/Combined_V5.py`: **Combined_V5**, a real, risk-managed portfolio (section below). Run it in the official
+  kit with `strategies/run_combined_v5.py`.
+* `strategies/Combined_V4.py`: **Combined_V4**, the near-cash ranker ($5 of $1M) that tops the 2026-10-07 web tables.
 * `strategies/Combined_V3.py`: the 20% -> 32% sleeve version from the 2026-10-07 web run (kept for comparison).
 * `strategies/Combined_V1.py`: the first near-cash combined agent.
 * `strategies/BreadthGuard_v2.py`: re-sized BreadthGuard that actually earns returns (section further down).
+
+## Combined_V5 (best agent that actually invests)
+
+Built from the review `Combined_V4_Review_and_V5_Proposal` and the composite-rank charts of past competitions (Q18-Q23).
+The charts show return and Sharpe predict rank best, low turnover helps, drawdown matters least, and many teams sit
+in cash at 0% return.
+
+| Part | Rule | Source |
+|---|---|---|
+| Size | sleeve = 1.5% annual vol target / forecast book vol, halved in a downtrend, set once per window (median 11%, 5-15%) | review A, tested |
+| Shape | weights ~ vol^-0.5 x (1 + 0.6 z), z = residual momentum | V4, jimin v5 |
+| Shock | x2.4 after a breadth-confirmed -2% selloff | BreadthGuard v2 |
+| Misses | 15 trading days in cash after an EPS miss; refreshed from Yahoo before every Round 1 | BreadthGuard |
+| Drawdown | sleeve x max(0.3, 1 - DD/5%), checked every round, recovers with NAV (no lock-in) | review B |
+| Trading | Round 1 re-targets outside a 30% band; Rounds 2-7 only de-risk; hold = no upload | review C |
+| Earnings overlay | built in, OFF: stepping out before reports lowered the score in every test | review D, not adopted |
+
+**Results** (`backtest/final5.py` -> `backtest/results_combined_v5.md`). The field mimics past competitions: cash and
+near-cash teams, 30-100% equal-weight books, momentum, mean reversion, vol targeting, an every-round rebalancer, the kit
+benchmarks and our own agents. Fees are 10 bp; Rounds 2-7 are simulated from Oct 2023.
+
+| Test | Combined_V5 | next | V5 place |
+|---|---|---|---|
+| 65 windows, teams holding a real portfolio | **4.57** | BreadthGuard v2 4.90 | **1st of 15** |
+| Oct 12-30 earnings-season windows 2022-25 (4) | **4.56** | BreadthGuard v2 4.63 | 1st (near tie) |
+| 65 windows, whole field | 7.91 | V4 6.15, PT 7.36, Cash 7.37 | 5th of 20 |
+| one run 2022-02 .. 2025-12 | +6.5%, max drawdown 2.3% | | |
+
+The rank score still rewards holding almost nothing: V4 and the near-cash teams stay ahead of every real portfolio.
+`SIGMA_TARGET` sets the size: higher earns more and ranks lower. Historical report dates for the overlay test are
+partly reconstructed (`data/fetch_earnings.py`); October 2026 dates come straight from Yahoo.
 
 ## Combined_V4 (rank 1 against the 2026-10-07 web field)
 
@@ -193,6 +225,10 @@ python3 final3.py                     # Combined_V1 final test -> results_combin
 python3 field4.py                     # screenshot field (2026-10-07 web run)
 python3 lab4.py configs/v4e.json      # Combined_V4 sweeps (VS_V1=1 adds a head-to-head with Combined_V1)
 python3 final4.py                     # Combined_V4 final test -> results_combined_v4.md
+python3 data/fetch_earnings.py        # report dates for the earnings overlay test (run from the repo root)
+python3 field5.py                     # realistic competition field
+python3 lab5.py configs/v5d.json      # Combined_V5 sweeps
+python3 final5.py                     # Combined_V5 final test -> results_combined_v5.md
 ```
 
 Replica assumptions: one Round-1 decision per day, filled at the open; 2 bp cost; marks every hour where Yahoo has

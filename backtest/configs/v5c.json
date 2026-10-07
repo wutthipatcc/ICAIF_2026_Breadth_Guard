@@ -1,0 +1,23 @@
+{
+ "hold sig.02": {
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0,
+  "SHOCK_STEP": 2.4,
+  "BAND": 1000000000.0,
+  "SIGMA_TARGET": 0.02
+ },
+ "hold sig.03": {
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0,
+  "SHOCK_STEP": 2.4,
+  "BAND": 1000000000.0,
+  "SIGMA_TARGET": 0.03
+ },
+ "band.15 sig.02": {
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0,
+  "SHOCK_STEP": 2.4,
+  "BAND": 0.15,
+  "SIGMA_TARGET": 0.02
+ }
+}

@@ -1,0 +1,50 @@
+{
+ "lock sig0.02 noearn nodd": {
+  "SIGMA_TARGET": 0.02,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0
+ },
+ "lock sig0.03 noearn nodd": {
+  "SIGMA_TARGET": 0.03,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0
+ },
+ "lock sig0.05 noearn nodd": {
+  "SIGMA_TARGET": 0.05,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0
+ },
+ "lock sig0.08 noearn nodd": {
+  "SIGMA_TARGET": 0.08,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0
+ },
+ "lock sig.05 noearn dd.05": {
+  "SIGMA_TARGET": 0.05,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 0.05
+ },
+ "lock sig.05 earn.5 nodd": {
+  "SIGMA_TARGET": 0.05,
+  "EARN_CUT": 0.5,
+  "DD_MAX": 1000000000.0
+ },
+ "lock sig.05 noearn nodd band.3": {
+  "SIGMA_TARGET": 0.05,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0,
+  "BAND": 0.3
+ },
+ "lock sig.05 noearn nodd notrend": {
+  "SIGMA_TARGET": 0.05,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0,
+  "TREND_CUT": 1.0
+ },
+ "lock sig.05 noearn nodd shock2.4": {
+  "SIGMA_TARGET": 0.05,
+  "EARN_CUT": 0.0,
+  "DD_MAX": 1000000000.0,
+  "SHOCK_STEP": 2.4
+ }
+}

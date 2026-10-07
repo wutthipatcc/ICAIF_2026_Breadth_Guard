@@ -1,0 +1,36 @@
+{
+ "default": {},
+ "sig0.02": {
+  "SIGMA_TARGET": 0.02
+ },
+ "sig0.04": {
+  "SIGMA_TARGET": 0.04
+ },
+ "sig0.08": {
+  "SIGMA_TARGET": 0.08
+ },
+ "sig0.12": {
+  "SIGMA_TARGET": 0.12
+ },
+ "no earn": {
+  "EARN_CUT": 0.0
+ },
+ "earn half": {
+  "EARN_CUT": 0.5
+ },
+ "no trend": {
+  "TREND_CUT": 1.0
+ },
+ "no dd": {
+  "DD_MAX": 1000000000.0
+ },
+ "dd .015": {
+  "DD_MAX": 0.015
+ },
+ "band .3": {
+  "BAND": 0.3
+ },
+ "smin .01": {
+  "S_MIN": 0.01
+ }
+}
