@@ -1,9 +1,9 @@
 # BreadthGuard
 
-* `strategies/BreadthGuard_v3.py`: **"Sentinel"**, the agent that ranks above Cash and PairTrading (below).
+* `strategies/Combined_V1.py`: **Combined_V1**, the agent that ranks above Cash and PairTrading (below).
 * `strategies/BreadthGuard_v2.py`: re-sized BreadthGuard that actually earns returns (section further down).
 
-## BreadthGuard v3 "Sentinel" (best competition rank)
+## Combined_V1 (best competition rank)
 
 **How the score works** (`backtest/field2.py`). The score is the average rank on four metrics: return, stability,
 max drop and trading. With 10 bp fees and fractional shares, this replica reproduces the web team table
@@ -18,7 +18,7 @@ about 0.07.
 | BreadthGuard v2 | 15% -> 36% momentum book, breadth-confirmed shock buying | real returns (+23.9% over the period), but 3rd or worse on max drop and trading |
 | jimin_test_v5 | 25% -> 40% residual-momentum book, shock cut-off at day 10 | best stock selection of the three, but the most exposure, so the worst risk ranks |
 
-**Design.** Stability ignores position size, and max drop and trading only reward holding less. So Sentinel:
+**Design.** Stability ignores position size, and max drop and trading only reward holding less. So Combined_V1:
 
 * holds less than PairTrading: 0.001% of capital, 0.008% after a shock;
 * picks the best 15-day risk-adjusted path: inverse-volatility weights (the least-correlated names get the most)
@@ -26,9 +26,9 @@ about 0.07.
 * keeps BreadthGuard's breadth-confirmed shock step-up and the earnings-miss exclusion;
 * buys once and holds, so it trades almost nothing.
 
-**Results** (`backtest/results_v3.md`; team + v3 + benchmarks, 65 windows; lower score is better):
+**Results** (`backtest/results_combined_v1.md`; team + Combined_V1 + benchmarks, 65 windows; lower score is better):
 
-| | Sentinel | PairTrading | Cash | Sentinel place |
+| | Combined_V1 | PairTrading | Cash | Combined_V1 place |
 |---|---|---|---|---|
 | all windows | **2.99** | 3.42 | 3.20 | **1st** |
 | 2024-25 | **3.05** | 3.30 | 3.54 | **1st** |
@@ -38,7 +38,7 @@ about 0.07.
 | whole shares only | 3.40 | 3.42 | 3.40 | ties Cash |
 | 1-cent minimum fee per order | 3.57 | 4.10 | 2.80 | 2nd |
 
-**Caveats.** Sentinel makes about 0% (0.004% over 2022-2025). It ranks well because of how the score is built,
+**Caveats.** Combined_V1 makes about 0% (0.004% over 2022-2025). It ranks well because of how the score is built,
 not because it earns anything. It relies on fractional shares and proportional fees, both of which fit the web
 run. It would lose its edge if a rival held even less, if the organisers add a return threshold, or if they rank
 differently in the official round.
@@ -115,8 +115,8 @@ python3 final_eval.py                 # v1 vs v2 vs micro -> results.md
 python3 comp.py && python3 comp_eval.py configs/cfg4.json   # v2 parameter sweeps
 python3 calib.py                      # which metrics the web scorer ranks
 python3 field2.py                     # calibrated field (10 bp fees; stress scenarios A/C)
-python3 lab3.py configs/m4.json B     # Sentinel candidate sweeps
-python3 final3.py                     # Sentinel final test -> results_v3.md
+python3 lab3.py configs/m4.json B     # Combined_V1 candidate sweeps
+python3 final3.py                     # Combined_V1 final test -> results_combined_v1.md
 ```
 
 Replica assumptions: one Round-1 decision per day, filled at the open; 2 bp cost; marks every hour where Yahoo has

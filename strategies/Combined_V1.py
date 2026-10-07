@@ -1,4 +1,4 @@
-"""BreadthGuard v3 "Sentinel" - near-cash ranker built from all three team agents
+"""Combined_V1 - near-cash ranker built from all three team agents (PairTrading, BreadthGuard, jimin)
 
 The competition score averages the RANKS of four per-window metrics: return, stability (mean / std of returns),
 max drop and trading (turnover per round) - see backtest/field2.py, which reproduces the web tool's team table to
@@ -24,7 +24,7 @@ import pandas as pd
 
 from testbed import get_daily_close, zero_weights
 
-NAME = "BreadthGuard_v3"
+NAME = "Combined_V1"
 
 MISS_DAYS = 15          # trading days to stay out after a miss
 MISS_THR = -0.5         # EPS surprise (%) below which it counts as a miss
@@ -260,14 +260,14 @@ def _rule(observation, E=EXPOSURE, mult=SHOCK_MULT):
     return out
 
 
-def sentinel(observation):
+def combined_v1(observation):
     return _rule(observation)
 
 
 def strategy(observation):
-    """Default entry point: BreadthGuard v3 "Sentinel"."""
-    return sentinel(observation)
+    """Default entry point: Combined_V1."""
+    return combined_v1(observation)
 
 
-sentinel.name = "BreadthGuard v3 Sentinel - 0.001% inv-vol resmom, 8x on broad shock, hold"
-strategy.name = "BreadthGuard v3 (Sentinel)"
+combined_v1.name = "Combined_V1 - 0.001% inv-vol resmom, 8x on broad shock, hold"
+strategy.name = "Combined_V1"
