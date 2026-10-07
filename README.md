@@ -1,9 +1,53 @@
-# BreadthGuard v2
+# BreadthGuard
+
+* `strategies/BreadthGuard_v3.py`: **"Sentinel"**, the agent that ranks above Cash and PairTrading (below).
+* `strategies/BreadthGuard_v2.py`: re-sized BreadthGuard that actually earns returns (section further down).
+
+## BreadthGuard v3 "Sentinel" (best competition rank)
+
+**How the score works** (`backtest/field2.py`). The score is the average rank on four metrics: return, stability,
+max drop and trading. With 10 bp fees and fractional shares, this replica reproduces the web team table
+(1.93 / 2.27 / 2.82 / 2.99 vs web 1.91 / 2.24 / 2.89 / 2.97) and the top 5 of the mock competition to within
+about 0.07.
+
+**What the three agents do:**
+
+| Agent | Trading view | Why it ranks where it does |
+|---|---|---|
+| PairTrading V5.1 | 0.003%-0.03% in stocks, +1-3% after any -2% day. The pair signals are multiplied by about 1e-6, so they hardly change the weights; it rebalances daily with many tiny orders | 2nd only to Cash on max drop and trading in every window; the return and stability ranks decide the rest |
+| BreadthGuard v2 | 15% -> 36% momentum book, breadth-confirmed shock buying | real returns (+23.9% over the period), but 3rd or worse on max drop and trading |
+| jimin_test_v5 | 25% -> 40% residual-momentum book, shock cut-off at day 10 | best stock selection of the three, but the most exposure, so the worst risk ranks |
+
+**Design.** Stability ignores position size, and max drop and trading only reward holding less. So Sentinel:
+
+* holds less than PairTrading: 0.001% of capital, 0.008% after a shock;
+* picks the best 15-day risk-adjusted path: inverse-volatility weights (the least-correlated names get the most)
+  tilted by jimin's residual momentum;
+* keeps BreadthGuard's breadth-confirmed shock step-up and the earnings-miss exclusion;
+* buys once and holds, so it trades almost nothing.
+
+**Results** (`backtest/results_v3.md`; team + v3 + benchmarks, 65 windows; lower score is better):
+
+| | Sentinel | PairTrading | Cash | Sentinel place |
+|---|---|---|---|---|
+| all windows | **2.99** | 3.42 | 3.20 | **1st** |
+| 2024-25 | **3.05** | 3.30 | 3.54 | **1st** |
+| 2022-23 | 2.92 | 3.54 | 2.88 | 2nd (just behind Cash) |
+| team table (4 agents) | **1.91** | 2.30 | n/a | 1st |
+| metrics rounded to 4 or 6 decimals | 2.97 / 2.92 | 3.11 / 3.32 | 3.54 / 3.37 | 1st |
+| whole shares only | 3.40 | 3.42 | 3.40 | ties Cash |
+| 1-cent minimum fee per order | 3.57 | 4.10 | 2.80 | 2nd |
+
+**Caveats.** Sentinel makes about 0% (0.004% over 2022-2025). It ranks well because of how the score is built,
+not because it earns anything. It relies on fractional shares and proportional fees, both of which fit the web
+run. It would lose its edge if a rival held even less, if the organisers add a return threshold, or if they rank
+differently in the official round.
+
 
 `strategies/BreadthGuard_v2.py` is the updated strategy (entry point `strategy`). `strategies/BreadthGuard_v1.py`
 is the previous version; the two teammates' strategies are in `strategies/` for the comparisons.
 
-## What changed
+## BreadthGuard v2: what changed from v1
 
 | | v1 | v2 |
 |---|---|---|
@@ -68,7 +112,11 @@ cd backtest
 python3 check_replica.py              # replica vs the web tool's rankings
 python3 corr_report.py                # correlation review
 python3 final_eval.py                 # v1 vs v2 vs micro -> results.md
-python3 comp.py && python3 comp_eval.py configs/cfg4.json   # parameter sweeps
+python3 comp.py && python3 comp_eval.py configs/cfg4.json   # v2 parameter sweeps
+python3 calib.py                      # which metrics the web scorer ranks
+python3 field2.py                     # calibrated field (10 bp fees; stress scenarios A/C)
+python3 lab3.py configs/m4.json B     # Sentinel candidate sweeps
+python3 final3.py                     # Sentinel final test -> results_v3.md
 ```
 
 Replica assumptions: one Round-1 decision per day, filled at the open; 2 bp cost; marks every hour where Yahoo has

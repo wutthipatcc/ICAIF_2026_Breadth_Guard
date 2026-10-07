@@ -113,8 +113,13 @@ BENCHMARKS = [bench_cash, bench_ew, bench_losers, bench_winners]
 
 
 # --------------------------------------------------------------------------- simulation
-def run_window(fn, days, cost_bps=2.0, reset=None, capital=1_000_000.0):
-    """Returns the array of portfolio values (start, then every mark) for one window."""
+LAST_TURNOVER = [0.0]
+
+
+def run_window(fn, days, cost_bps=2.0, reset=None, capital=1_000_000.0, min_fee=0.0, whole_shares=False):
+    """Returns the array of portfolio values (start, then every mark) for one window.
+    The window's total traded notional / value is left in LAST_TURNOVER[0]."""
+    traded = 0.0
     if reset:
         reset()
     cash, shares = capital, np.zeros(30)
@@ -141,13 +146,18 @@ def run_window(fn, days, cost_bps=2.0, reset=None, capital=1_000_000.0):
             if t.sum() > 1:
                 t = t / t.sum()
             new_sh = t * value / px
-            turnover = np.abs(new_sh - shares) @ px
-            cost = turnover * cost_bps / 1e4
+            if whole_shares:
+                new_sh = np.floor(new_sh + 1e-9)
+            order = np.abs(new_sh - shares) * px
+            turnover = order.sum()
+            cost = (np.maximum(order * cost_bps / 1e4, min_fee) * (order > 1e-9)).sum()
+            traded += turnover / value
             cash = cash + (shares - new_sh) @ px - cost
             shares = new_sh
         vals.append(cash + shares @ px)
         for row in marks(day):
             vals.append(cash + shares @ row)
+    LAST_TURNOVER[0] = traded
     return np.array(vals)
 
 
@@ -157,7 +167,8 @@ def metrics(v):
     sd = r.std()
     stab = r.mean() / sd if sd > 1e-12 else 0.0
     dd = float((1 - v / np.maximum.accumulate(v)).max())
-    return {"return": ret, "stability": stab, "maxdd": dd, "vol": sd}
+    return {"return": ret, "stability": stab, "maxdd": dd, "vol": sd, "worst": float(max(0.0, -r.min())),
+            "trading": LAST_TURNOVER[0] / 105.0}
 
 
 def _rank(x, higher_better):
