@@ -29,14 +29,22 @@ benchmarks and our own agents. Fees are 10 bp; Rounds 2-7 are simulated from Oct
 
 | Test | Combined_V5 | next | V5 place |
 |---|---|---|---|
-| 65 windows, teams holding a real portfolio | **4.57** | BreadthGuard v2 4.90 | **1st of 15** |
-| Oct 12-30 earnings-season windows 2022-25 (4) | **4.56** | BreadthGuard v2 4.63 | 1st (near tie) |
-| 65 windows, whole field | 7.91 | V4 6.15, PT 7.36, Cash 7.37 | 5th of 20 |
+| 65 windows, teams holding a real portfolio | **4.49** | BreadthGuard v2 4.95 | **1st of 15** |
+| Oct 12-30 earnings-season windows 2022-25 (4) | **4.25** | BreadthGuard v2 4.81 | 1st |
+| 65 windows, whole field | 7.83 | V4, PT, Cash ahead | 5th of 20 |
 | one run 2022-02 .. 2025-12 | +6.5%, max drawdown 2.3% | | |
 
 The rank score still rewards holding almost nothing: V4 and the near-cash teams stay ahead of every real portfolio.
 `SIGMA_TARGET` sets the size: higher earns more and ranks lower. Historical report dates for the overlay test are
 partly reconstructed (`data/fetch_earnings.py`); October 2026 dates come straight from Yahoo.
+
+**Universe variants** (`backtest/excl5.py` -> `backtest/results_v5_variants.md`; `EXCLUDE` in the file):
+
+| Variant | 65 windows (real portfolios) | Oct windows | 2022-25 one run |
+|---|---|---|---|
+| `Combined_V5.py` (all 30) | 4.49, 1st | 4.25, 1st | +6.5%, max DD 2.3% |
+| `Combined_V5_noTSLA.py` | 4.59, 1st | 4.25, 1st | +6.9%, max DD 2.3% |
+| `Combined_V5_noTSLA_noHealth.py` | **4.41**, 1st | **3.94**, 1st | +7.0%, max DD 2.5% |
 
 ## Combined_V4 (rank 1 against the 2026-10-07 web field)
 

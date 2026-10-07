@@ -1,4 +1,9 @@
-"""Combined_V5 - a real, risk-managed portfolio built from PairTrading V5.1, BreadthGuard v2 and jimin_test_v5
+"""Combined_V5 without Tesla: TSLA is never held (always submitted at 0).
+Result (backtest/results_v5_variants.md): 65 windows 4.59 (#1 of real portfolios; V5 4.49), Oct windows 4.25 (= V5),
+2022-25 one run +6.9%, max drawdown 2.3%.
+Everything else is identical to Combined_V5 (description below).
+
+Combined_V5 - a real, risk-managed portfolio built from PairTrading V5.1, BreadthGuard v2 and jimin_test_v5
 (ACM ICAIF 2026 Trading Agent Competition)
 
 Objective (official kit docs/evaluation.md): teams are ranked on cumulative return (higher), Sharpe of per-round
@@ -88,7 +93,7 @@ except ImportError:                                       # official kit: bring 
     def zero_weights():
         return {s: 0.0 for s in UNIVERSE}
 
-NAME = "Combined_V5"
+NAME = "Combined_V5_noTSLA"
 
 MISS_DAYS = 15          # trading days to stay out after a miss
 MISS_THR = -0.5         # EPS surprise (%) below which it counts as a miss
@@ -335,7 +340,7 @@ VOL_WIN = 60
 SIZE_LOCK = True          # size the sleeve once (first purchase); afterwards only shock / drawdown change it
 BAND = 0.30               # Round-1 no-trade band: trade only if sum|target - held| > BAND x sleeve
 PER_NAME_CAP = 0.30
-EXCLUDE = ()              # symbols never held (always submitted at 0); signals still use them as peers
+EXCLUDE = ("TSLA",)  # symbols never held (always submitted at 0); signals still use them as peers
 INITIAL_NAV = 1_000_000.0
 
 
@@ -496,7 +501,7 @@ def make_rule(name=None, **params):
         finally:
             g.update(saved)
 
-    rule.name = name or "Combined_V5"
+    rule.name = name or "Combined_V5_noTSLA"
     return rule
 
 
@@ -508,11 +513,11 @@ def strategy(observation):
     return combined_v5(observation)
 
 
-strategy.name = "Combined_V5"
+strategy.name = "Combined_V5_noTSLA"
 
 
 # ----------------------------------------------------------------------------------- official kit
-STATE_FILE = os.environ.get("COMBINED_V5_STATE", ".icaif/combined_v5_state.json")
+STATE_FILE = os.environ.get("COMBINED_V5_NOTSLA_STATE", ".icaif/combined_v5_notsla_state.json")
 
 
 def _load_state():
