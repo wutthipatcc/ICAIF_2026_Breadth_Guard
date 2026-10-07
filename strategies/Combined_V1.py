@@ -18,11 +18,62 @@ it makes essentially no money, it just ranks above Cash and PairTrading.  Tested
 (all from the 2026-10-07 web run): fractional shares, fees proportional to notional (~10 bp), metrics ranked on
 unrounded values or rounded to >= 4 decimals.  If the testbed only fills whole shares it holds nothing and ties
 Cash; if there is a per-order minimum fee of 1 cent it falls behind Cash (but still ahead of PairTrading).
+
+Competition alignment (checked against the official starter kit, docs/rules.md + docs/evaluation.md):
+  * official metrics = cumulative return, Sharpe (per-round returns, x42), max drawdown (period ends + daily closes),
+    turnover (mean notional / NAV per round); equal-weight ranks over all teams, exact values, shared ties;
+  * fractional shares are allowed and the fee is a flat 0.1% of notional - the two assumptions this agent needs;
+  * long-only, every weight in [0, 0.30], sum <= 1, all 30 symbols in every decision;
+  * a missing decision holds the portfolio with no trade and no fee, so holding = not uploading (run_combined_v1.py).
+
+Two ways to run it:
+  * team testbed / web tool: `strategy(observation)` as before (None = hold);
+  * official kit: `python run_combined_v1.py --phase official` from the kit root (uploads only when it trades), or
+    `tools/auto_submit.py watch --strategy Combined_V1:kit_strategy` (watch needs weights every round, so on hold
+    rounds it re-submits the last target - a few cents of drift trading per day).
+  Outside the testbed, daily closes come from `observation["daily_close"]` if supplied, else from Yahoo Finance
+  (public, permitted by docs/llm_and_external_data.md), using only closes completed before the decision day.
 """
+import json
+import os
+
 import numpy as np
 import pandas as pd
 
-from testbed import get_daily_close, zero_weights
+UNIVERSE = ["AAPL", "MSFT", "NVDA", "INTC", "CRM", "JPM", "BAC", "GS", "V", "PYPL", "LLY", "JNJ", "UNH", "PFE", "TMO",
+            "AMZN", "TSLA", "WMT", "NKE", "KO", "CAT", "GE", "BA", "XOM", "CVX", "GOOGL", "META", "DIS", "T", "NEE"]
+
+try:                                                      # team testbed / web tool
+    from testbed import get_daily_close, zero_weights
+except ImportError:                                       # official kit: bring our own (public) daily closes
+    _YF_CACHE = {}
+
+    def _round_day(observation):
+        rnd = observation.get("round") or {}
+        for v in (rnd.get("day"), str(rnd.get("id", "")).split("-r")[0].split("-", 1)[-1], observation.get("as_of")):
+            try:
+                return pd.Timestamp(str(v)[:10])
+            except (ValueError, TypeError):
+                continue
+        return pd.Timestamp.now(tz="America/New_York").tz_localize(None).normalize()
+
+    def get_daily_close(observation, lookback=253):
+        day = _round_day(observation)
+        d = observation.get("daily_close")
+        if not isinstance(d, pd.DataFrame):
+            if day not in _YF_CACHE:
+                import yfinance as yf
+                start = (day - pd.Timedelta(days=int(lookback * 1.6) + 30)).strftime("%Y-%m-%d")
+                px = yf.download(UNIVERSE, start=start, end=day.strftime("%Y-%m-%d"), auto_adjust=True,
+                                 progress=False)["Close"]
+                px.index = pd.DatetimeIndex(px.index).tz_localize(None) if px.index.tz else pd.DatetimeIndex(px.index)
+                _YF_CACHE[day] = px
+            d = _YF_CACHE[day]
+        d = d[pd.DatetimeIndex(d.index).normalize() < day]   # completed closes only
+        return d.reindex(columns=UNIVERSE).iloc[-lookback:]
+
+    def zero_weights():
+        return {s: 0.0 for s in UNIVERSE}
 
 NAME = "Combined_V1"
 
@@ -226,18 +277,15 @@ def _base_weights(daily, z):
     return b / b.sum() if b.sum() > 0 else np.full(len(z), 1.0 / len(z))
 
 
-def _rule(observation, E=EXPOSURE, mult=SHOCK_MULT):
+def _decide(observation, cur, started, E=EXPOSURE, mult=SHOCK_MULT):
+    """Core decision. cur = current stock weights (array), started = an opening purchase exists.
+    Returns (weights array or None for hold, sleeve after the decision)."""
     syms = observation["symbols"]
     n = len(syms)
-    port = observation["portfolio"]
-    started = bool(port.get("positions"))
     if started and observation["round"]["number"] != 1:
-        return None                                       # decide once a day, at Round 1
+        return None, None                                 # decide once a day, at Round 1
 
     daily = get_daily_close(observation, lookback=LOOKBACK).reindex(columns=syms)
-    w = port.get("weights") or {}
-    cur = np.array([float(w.get(s, 0.0)) for s in syms])
-
     S0, S1 = E, E * mult
     switched = started and cur.sum() > (S0 + S1) / 2
     fire = started and not switched and _shock_yesterday(daily)
@@ -253,11 +301,88 @@ def _rule(observation, E=EXPOSURE, mult=SHOCK_MULT):
         new = cur.copy()                                  # otherwise hold: only sell a name that just missed
         new[excl] = 0.0
     else:
-        return None
+        return None, S
+    return np.clip(new, 0.0, 0.30), S
 
+
+def _out(syms, w):
     out = zero_weights()
-    out.update({s: float(v) for s, v in zip(syms, np.clip(new, 0.0, 0.30))})
+    out.update({s: float(v) for s, v in zip(syms, w)})
     return out
+
+
+def _rule(observation, E=EXPOSURE, mult=SHOCK_MULT):
+    """Testbed path: the portfolio carries `positions` and `weights`; None = hold."""
+    syms = observation["symbols"]
+    port = observation["portfolio"]
+    w = port.get("weights") or {}
+    cur = np.array([float(w.get(s, 0.0)) for s in syms])
+    new, _ = _decide(observation, cur, bool(port.get("positions")), E, mult)
+    return None if new is None else _out(syms, new)
+
+
+# ----------------------------------------------------------------------------------- official kit state
+STATE_FILE = os.environ.get("COMBINED_V1_STATE", ".icaif/combined_v1_state.json")
+
+
+def _load_state():
+    try:
+        with open(STATE_FILE) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def save_state(phase, weights, round_id):
+    """Record what was actually uploaded for `phase` (call only after a VALID receipt)."""
+    st = _load_state()
+    st[phase] = {"target": {s: float(v) for s, v in weights.items()}, "round_id": round_id}
+    os.makedirs(os.path.dirname(STATE_FILE) or ".", exist_ok=True)
+    with open(STATE_FILE, "w") as f:
+        json.dump(st, f, indent=1)
+
+
+def refresh_misses(today=None):
+    """Add earnings misses published since MISS_TABLE was written (Yahoo Finance earnings dates; public data).
+    A report before 09:00 ET is effective that day, otherwise the next day - the same rule as MISS_TABLE.
+    Only reports already public at `today` are added. Returns the number of misses added."""
+    import yfinance as yf
+    today = pd.Timestamp(today or pd.Timestamp.now(tz="America/New_York").tz_localize(None)).normalize()
+    added = 0
+    for t in UNIVERSE:
+        try:
+            e = yf.Ticker(t).get_earnings_dates(limit=8).reset_index()
+        except Exception:
+            continue
+        e.columns = ["dt", "eps_est", "eps_rep", "surprise"][:len(e.columns)]
+        e = e.dropna(subset=["surprise"])
+        dt = pd.to_datetime(e.dt, utc=True).dt.tz_convert("America/New_York").dt.tz_localize(None)
+        for d, srp in zip(dt, e.surprise):
+            eff = d.normalize() if d.hour < 9 else d.normalize() + pd.Timedelta(days=1)
+            known = {x for x, _ in _MISS.get(t, [])}
+            if srp < MISS_THR and eff <= today and eff not in known:
+                add_miss(t, eff.strftime("%Y%m%d"), float(srp))
+                added += 1
+    return added
+
+
+def kit_decide(observation):
+    """Official-kit path. Returns the 30 weights to upload, or None when the agent holds (upload nothing)."""
+    syms = list(observation["symbols"])
+    prev = (_load_state().get(observation["phase"]) or {}).get("target") or {}
+    cur = np.array([float(prev.get(s, 0.0)) for s in syms])
+    new, _ = _decide(observation, cur, cur.sum() > 0)
+    return None if new is None else _out(syms, new)
+
+
+def kit_strategy(observation):
+    """For `auto_submit.py watch`, which needs weights every round: on hold, re-submit the last target."""
+    w = kit_decide(observation)
+    if w is None:
+        prev = (_load_state().get(observation["phase"]) or {}).get("target")
+        return prev if prev else _out(observation["symbols"], np.zeros(len(observation["symbols"])))
+    save_state(observation["phase"], w, observation["round"]["id"])
+    return w
 
 
 def combined_v1(observation):
@@ -265,7 +390,7 @@ def combined_v1(observation):
 
 
 def strategy(observation):
-    """Default entry point: Combined_V1."""
+    """Default entry point (team testbed): Combined_V1. None = hold."""
     return combined_v1(observation)
 
 

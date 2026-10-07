@@ -47,6 +47,32 @@ differently in the official round.
 `strategies/BreadthGuard_v2.py` is the updated strategy (entry point `strategy`). `strategies/BreadthGuard_v1.py`
 is the previous version; the two teammates' strategies are in `strategies/` for the comparisons.
 
+## Official competition alignment (checked against the ICAIF 2026 starter kit)
+
+| Official rule (kit `docs/`) | Combined_V1 |
+|---|---|
+| Score = mean of ranks on cumulative return, Sharpe (per-round, x42), max drawdown (period ends + daily closes), turnover; exact values, shared ties | Same four metrics are what the replica ranks (`backtest/field2.py`) |
+| Long-only, each weight 0-0.30, sum <= 1, all 30 symbols | Yes. Every upload passes the kit's own `validate_payload` (`kit_tests/test_kit.py`) |
+| Fractional shares allowed; fee 0.1% of notional, no minimum | These are the two assumptions the near-cash design needs. Both are confirmed |
+| Missing decision = hold, no trade, no fee | `run_combined_v1.py` uploads only when the agent trades (about 1-3 times per 105 rounds) |
+| `watch` calls `strategy(observation)` and needs 30 weights every round | Fixed: the old `None` (hold) would have stopped `watch`. `kit_strategy` re-submits the last target instead |
+| No price feed in the kit; public data only, disclosed | Daily closes from Yahoo Finance (completed closes before the decision day). Earnings misses are refreshed daily from Yahoo |
+
+**Against a whole competition field, not just your team** (`backtest/field3.py`: three random 48-team fields with
+cash teams, near-cash teams and 40 generic agents at 5-100% exposure, 65 windows):
+
+| Agent | avg finishing position (of 48) | top-3 finishes |
+|---|---|---|
+| **Combined_V1** | **5.3** | 41% |
+| PairTrading V5.1 | 7.1 | 38% |
+| BreadthGuard v2 | 12.5 | 13% |
+| jimin_test_v5 | 15.8 | 4% |
+| an all-cash team | about 11.5 | n/a |
+
+Higher sleeves (0.01%-5%) all finish worse, so the 0.001% sleeve stays. Run in the kit:
+`python run_combined_v1.py --phase validation --once` (Validation, Oct 8-9), then
+`python run_combined_v1.py --phase official` (Oct 12-30).
+
 ## BreadthGuard v2: what changed from v1
 
 | | v1 | v2 |
