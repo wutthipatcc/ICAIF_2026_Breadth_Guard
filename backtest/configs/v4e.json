@@ -1,0 +1,114 @@
+{
+ "E0=5e-06 ivp0.5 tilt0.6 x6": {
+  "E0": 5e-06,
+  "E1": 3.0000000000000004e-05,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 0.6
+ },
+ "E0=5e-06 ivp0.5 tilt0.6 x10": {
+  "E0": 5e-06,
+  "E1": 5e-05,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 0.6
+ },
+ "E0=5e-06 ivp0.5 tilt1.0 x6": {
+  "E0": 5e-06,
+  "E1": 3.0000000000000004e-05,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 1.0
+ },
+ "E0=5e-06 ivp0.5 tilt1.0 x10": {
+  "E0": 5e-06,
+  "E1": 5e-05,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 1.0
+ },
+ "E0=5e-06 ivp0.75 tilt0.6 x6": {
+  "E0": 5e-06,
+  "E1": 3.0000000000000004e-05,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 0.6
+ },
+ "E0=5e-06 ivp0.75 tilt0.6 x10": {
+  "E0": 5e-06,
+  "E1": 5e-05,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 0.6
+ },
+ "E0=5e-06 ivp0.75 tilt1.0 x6": {
+  "E0": 5e-06,
+  "E1": 3.0000000000000004e-05,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 1.0
+ },
+ "E0=5e-06 ivp0.75 tilt1.0 x10": {
+  "E0": 5e-06,
+  "E1": 5e-05,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 1.0
+ },
+ "E0=1e-05 ivp0.5 tilt0.6 x6": {
+  "E0": 1e-05,
+  "E1": 6.000000000000001e-05,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 0.6
+ },
+ "E0=1e-05 ivp0.5 tilt0.6 x10": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 0.6
+ },
+ "E0=1e-05 ivp0.5 tilt1.0 x6": {
+  "E0": 1e-05,
+  "E1": 6.000000000000001e-05,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 1.0
+ },
+ "E0=1e-05 ivp0.5 tilt1.0 x10": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "ivpow": 0.5,
+  "tilt": 1.0
+ },
+ "E0=1e-05 ivp0.75 tilt0.6 x6": {
+  "E0": 1e-05,
+  "E1": 6.000000000000001e-05,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 0.6
+ },
+ "E0=1e-05 ivp0.75 tilt0.6 x10": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 0.6
+ },
+ "E0=1e-05 ivp0.75 tilt1.0 x6": {
+  "E0": 1e-05,
+  "E1": 6.000000000000001e-05,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 1.0
+ },
+ "E0=1e-05 ivp0.75 tilt1.0 x10": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "ivpow": 0.75,
+  "tilt": 1.0
+ }
+}

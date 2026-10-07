@@ -1,0 +1,72 @@
+{
+ "x10": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null
+ },
+ "x8 (=V1 replica)": {
+  "E0": 1e-05,
+  "E1": 8e-05,
+  "cutoff": null
+ },
+ "x10 rearm cap100": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "rearm": true
+ },
+ "x10 rearm cap1000": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "rearm": true,
+  "cap_mult": 1000
+ },
+ "x10 thr-1.5%": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "shock_thr": -0.015
+ },
+ "x10 thr-2.5%": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "shock_thr": -0.025
+ },
+ "x10 oversold-5%": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "oversold": -0.05
+ },
+ "x10 oversold-3%": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "oversold": -0.03
+ },
+ "x10 ivpow2": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "ivpow": 2.0
+ },
+ "x10 ivpow0.5": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "ivpow": 0.5
+ },
+ "x10 tilt1.0": {
+  "E0": 1e-05,
+  "E1": 0.0001,
+  "cutoff": null,
+  "tilt": 1.0
+ },
+ "x10 E0=3e-6": {
+  "E0": 3e-06,
+  "E1": 3e-05,
+  "cutoff": null
+ }
+}

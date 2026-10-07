@@ -1,7 +1,54 @@
 # BreadthGuard
 
-* `strategies/Combined_V1.py`: **Combined_V1**, the agent that ranks above Cash and PairTrading (below).
+* `strategies/Combined_V4.py`: **Combined_V4**, the current best agent (section below). Run it in the official kit with
+  `strategies/run_combined_v4.py`.
+* `strategies/Combined_V3.py`: the 20% -> 32% sleeve version from the 2026-10-07 web run (kept for comparison).
+* `strategies/Combined_V1.py`: the first near-cash combined agent.
 * `strategies/BreadthGuard_v2.py`: re-sized BreadthGuard that actually earns returns (section further down).
+
+## Combined_V4 (rank 1 against the 2026-10-07 web field)
+
+**Objective (official kit, `docs/evaluation.md`).** Each team is ranked on cumulative return, Sharpe of per-round returns,
+max drawdown and turnover; the score is the mean of the four ranks (lower is better). Two of the four only reward
+holding less, and Sharpe does not depend on position size.
+
+**Why Combined_V3 lost.** Its 20-32% sleeve ranked 3rd-5th on drawdown and turnover in every window. Its drawdown brake
+(cash for the rest of the window) also left it flat at -2.7% in the one-run test. In the sweep (`backtest/lab4.py`),
+every sleeve of 1% or more ranked below PairTrading.
+
+**What V4 takes from each agent:**
+
+| From | In Combined_V4 |
+|---|---|
+| PairTrading V5.1 | hold less than everyone: 0.0005% of NAV ($5 of $1M), 10x after a shock (PT: 0.003-0.03%, +1-3%) |
+| jimin_test_v5 | residual-momentum tilt (market + sector betas, 12-1 window) |
+| BreadthGuard v2 | breadth-confirmed -2% shock step-up (any day, no day-10 cut-off), earnings-miss exclusion |
+| new | square-root inverse-vol weights; hold, re-target only when the book drifts > 10% of the sleeve |
+
+**Results** (`backtest/final4.py` -> `backtest/results_combined_v4.md`). The replica reproduces the web screenshot to
+within about 0.1 (PT 2.51 / v2 2.90 / V3 3.29 / jimin 3.71 vs web 2.47 / 2.86 / 3.23 / 3.73). NemoV5's code is not in the
+repo, so a calibrated stand-in is used.
+
+| Table | Combined_V4 | best other | V4 place |
+|---|---|---|---|
+| 1. team strategies, 65 three-week tests | **2.66** | PairTrading 3.20 | **1st** |
+| 2. whole period in one run | 2.5 | PairTrading 2.5 | tie (PT wins the tiebreak on return) |
+| 3. mock competition with benchmarks | **3.71** | Cash 4.29, PairTrading 4.33 | **1st** |
+| 3. same, 2022-23 / 2024-25 windows | 3.53 / 3.90 | Cash 3.80 / PT 4.27 | 1st / 1st |
+| 3. with Combined_V1 also in the field | 3.99 | V1, PT 5.01 | 1st |
+| 3. metrics rounded to 4 or 6 decimals | 3.70 / 3.64 | | 1st |
+| stress: whole shares only | 4.48 | Cash 4.48 | ties Cash |
+| stress: 1-cent minimum fee per order | 5.22 | Cash 3.72 | 5th |
+
+**Caveats.** Combined_V4 earns essentially nothing (0.0035% over 2022-2025). It wins on how the score is built. It needs
+fractional shares and a fee proportional to notional with no minimum; the official rules confirm both. A rival that
+holds even less would beat it on drawdown and turnover. `E_BASE` is the size knob: a bigger sleeve earns more but
+ranks lower.
+
+**Run in the official kit.** Copy `Combined_V4.py` and `run_combined_v4.py` into the starter-kit root, then run
+`python run_combined_v4.py --phase validation --once` or `--phase official`. It uploads only when the agent trades
+(6 uploads in 105 rounds in the replay `kit_tests/test_kit_v4.py`); holding means no upload, no trade and no fee.
+Data: Yahoo Finance daily closes and earnings dates (public; disclose in the final materials). No LLM.
 
 ## Combined_V1 (best competition rank)
 
@@ -143,6 +190,9 @@ python3 calib.py                      # which metrics the web scorer ranks
 python3 field2.py                     # calibrated field (10 bp fees; stress scenarios A/C)
 python3 lab3.py configs/m4.json B     # Combined_V1 candidate sweeps
 python3 final3.py                     # Combined_V1 final test -> results_combined_v1.md
+python3 field4.py                     # screenshot field (2026-10-07 web run)
+python3 lab4.py configs/v4e.json      # Combined_V4 sweeps (VS_V1=1 adds a head-to-head with Combined_V1)
+python3 final4.py                     # Combined_V4 final test -> results_combined_v4.md
 ```
 
 Replica assumptions: one Round-1 decision per day, filled at the open; 2 bp cost; marks every hour where Yahoo has

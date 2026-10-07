@@ -1,0 +1,85 @@
+{
+ "nocut x1.0": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 1e-05
+ },
+ "nocut x2.4": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05
+ },
+ "nocut x4": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 4e-05
+ },
+ "nocut x10": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 0.0001
+ },
+ "nocut x30": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 0.00030000000000000003
+ },
+ "cut10 x10": {
+  "E0": 1e-05,
+  "E1": 0.0001
+ },
+ "nocut x2.4 mean-shock": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "shock_kind": "mean"
+ },
+ "nocut x2.4 voltgt.15": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "voltgt": 0.15
+ },
+ "nocut x2.4 trend_off": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "trend_off": true
+ },
+ "nocut x2.4 zero if ma100<0": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "trend_zero": "mkt_ma100"
+ },
+ "nocut x2.4 zero if mom20<0": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "trend_zero": "mkt_mom20"
+ },
+ "nocut x2.4 tilt1.0": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "tilt": 1.0
+ },
+ "nocut x2.4 tilt0.3": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "tilt": 0.3
+ },
+ "nocut x2.4 lowvol": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "score": "z_lowvol"
+ },
+ "nocut x2.4 nomiss": {
+  "E0": 1e-05,
+  "cutoff": null,
+  "E1": 2.4e-05,
+  "miss": false
+ }
+}
